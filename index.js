@@ -1,24 +1,29 @@
 import request from 'request';
 import instapromise from 'instapromise';
+import minimist from 'minimist';
 import websiteScraper from 'website-scraper';
 
 let count = 0;
 let failures = 0;
 let url = 'http://opt412.getforge.io/';
+let argv = minimist(process.argv.slice(2));
+
+let times = argv._[0] || 100;
 
 async function hitOpt412WebsiteAsync() {
 
+  let result;
   try {
-    let result = await websiteScraper.promise.scrape({
+    result = await websiteScraper.promise.scrape({
       urls: [url],
       directory: '/tmp/hit412-tmp/' + Math.random() + '/',
     });
   } catch (e) {
     failures++;
     console.error("Failure " + failures + " : " + e);
-    return null;
+    throw e;
   }
-  // let result = await request.promise.get(url);
+  // result = await request.promise.get(url);
   count += 1;
   console.log("Hit opt412.org " + count + " times");
   return result;
@@ -33,6 +38,6 @@ async function hitNTimesAsync(n) {
   return await Promise.all(awaitables);
 }
 
-hitNTimesAsync(1000).then(() => {
+hitNTimesAsync(times).then(() => {
   console.log("Completed " + count + " hits");
 }, console.error);
